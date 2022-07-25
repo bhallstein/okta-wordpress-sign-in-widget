@@ -56,7 +56,10 @@
         el: '#okta-login-container'
       })
         .then(function(result) {
-          oktaSignIn.authClient.handleLoginRedirect(result.tokens);
+          oktaSignIn.authClient.handleLoginRedirect(
+            result.tokens,
+            '<?php echo $loginRedirect ?>'
+          );
         })
         .catch(function(err) {
           console.log('//showSignIn err/', err)
