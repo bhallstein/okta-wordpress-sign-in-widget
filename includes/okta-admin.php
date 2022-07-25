@@ -43,6 +43,18 @@ class OktaAdmin{
             'okta-sign-in-widget-options-section'
         );
 
+        register_setting('okta-sign-in-widget', 'okta-widget-login-redirect', array(
+            'type' => 'string',
+            'show_in_rest' => false,
+        ));
+        add_settings_field(
+            'okta-widget-login-redirect',
+            'Login redirect',
+            function() { $this->optionsPageTextInputAction('okta-widget-login-redirect', 'text', null, 'Set the redirect URL after login. Please note these must be configured as permitted login redirects within the Okta app.'); },
+            'okta-sign-in-widget',
+            'okta-sign-in-widget-options-section'
+        );
+
         register_setting('okta-sign-in-widget', 'okta-allow-wordpress-login', array(
             'type' => 'boolean',
             'show_in_rest' => false,
@@ -97,7 +109,7 @@ class OktaAdmin{
             esc_attr($option_name),
             $option_value ? 'checked="checked"' : ''
         );
-        if($description) 
+        if($description)
             echo '<p class="description">'.$description.'</p>';
     }
 

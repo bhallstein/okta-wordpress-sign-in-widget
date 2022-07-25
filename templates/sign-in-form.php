@@ -2,7 +2,7 @@
 
 <style type="text/css">
     body {
-        font-family: montserrat,Arial,Helvetica,sans-serif;        
+        font-family: montserrat,Arial,Helvetica,sans-serif;
     }
 
     #wordpress-login{
@@ -44,24 +44,38 @@
 <script>
     <?php include plugin_dir_path(__FILE__).'/../includes/initialize-widget.js.php'; ?>
 
-    oktaSignIn.authClient.token.getUserInfo().then(function(user) {
-      console.log("Already logged in");
-      oktaSignIn.authClient.tokenManager.get('idToken').then(function(idToken){
-        window.location = '<?php echo wp_login_url() ?>?log_in_from_id_token='+idToken.value;
-      });
-    }, function(error) {
-      oktaSignIn.showSignInToGetTokens({
-        el: '#okta-login-container'
-      }).then(function(tokens) {
-        oktaSignIn.authClient.tokenManager.setTokens(tokens);
-
-        oktaSignIn.remove(); // Remove the widget from the DOM
-
-        const idToken = tokens.idToken;
-        window.location = '<?php echo wp_login_url() ?>?log_in_from_id_token='+idToken.value;
-
-      }).catch(function(err) {
-        console.error(err);
-      });
+    oktaSignIn.on('afterError', function (context, error) {
+      console.log(context.controller);
+      console.log(error.name);
+      console.log(error.message);
+      console.log(error.statusCode);
     });
+
+    function authenticate() {
+      oktaSignIn.showSignIn({
+        el: '#okta-login-container'
+      })
+        .then(function(result) {
+          oktaSignIn.authClient.handleLoginRedirect(result.tokens);
+        })
+        .catch(function(err) {
+          console.log('//showSignIn err/', err)
+        })
+    }
+
+    function getUser() {
+      return oktaSignIn.authClient.token.getUserInfo()
+        .then(function(user) {
+          oktaSignIn.authClient.tokenManager.get('idToken')
+            .then(function(idToken) {
+              window.location = 'http://localhost:8080/wp-login.php?log_in_from_id_token='+idToken.idToken;
+            });
+        })
+    }
+
+    getUser()
+      .catch(function(err) {
+        console.log('//getUser err/', err)
+        authenticate()
+      })
 </script>

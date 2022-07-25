@@ -5,7 +5,7 @@
 
 oktaSignIn.authClient.session.exists()
   .then(function(exists) {
-    if(exists) {
+    if (exists) {
       oktaSignIn.authClient.token.getWithoutPrompt({
         responseType: ['id_token'],
       })
