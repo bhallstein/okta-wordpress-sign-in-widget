@@ -9,7 +9,7 @@ docker run -d \
     -e WORDPRESS_DB_USER=root \
     -e WORDPRESS_DB_PASSWORD=root \
     -e WORDPRESS_DB_NAME=wp \
-    -v $(pwd):/var/www/html/wp-content/plugins/okta-wordpress-sign-in-widget \
+    -v "$(pwd)":/var/www/html/wp-content/plugins/okta-wordpress-sign-in-widget \
     wordpress
 
 docker run -d \
@@ -18,7 +18,7 @@ docker run -d \
   -e MYSQL_USER=root \
   -e MYSQL_ROOT_PASSWORD=root \
   -e MYSQL_DATABASE=wp \
-  -v $(pwd)/db:/var/lib/mysql \
+  -v "$(pwd)"/db:/var/lib/mysql \
   ubuntu/mysql
 
 sleep 3
