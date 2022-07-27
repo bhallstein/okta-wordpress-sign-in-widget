@@ -37,7 +37,7 @@
 <div id="primary" class="content-area">
   <div id="okta-login-container"></div>
   <?php if(get_option('okta-allow-wordpress-login')): ?>
-      <div id="wordpress-login"><a href="<?php echo wp_login_url(); ?>?wordpress_login=true">Login via Wordpress</a></div>
+    <div id="wordpress-login"><a href="<?php echo wp_login_url(); ?>?wordpress_login=true">Login via Wordpress</a></div>
   <?php endif ?>
 </div>
 
@@ -51,34 +51,30 @@
       console.log(error.statusCode);
     });
 
+    function redirect_to_set_auth() {
+      oktaSignIn.authClient.tokenManager.get('idToken')
+        .then(function(idToken) {
+          window.location = '<?php echo $wp_url ?>/wp-login.php?log_in_from_id_token=' + idToken.idToken;
+        });
+    }
+
     function authenticate() {
       oktaSignIn.showSignIn({
         el: '#okta-login-container'
       })
         .then(function(result) {
-          oktaSignIn.authClient.handleLoginRedirect(
-            result.tokens,
-            '<?php echo $loginRedirect ?>'
-          );
+          oktaSignIn.authClient.tokenManager.setTokens(result.tokens)
+          redirect_to_set_auth()
         })
         .catch(function(err) {
           console.log('//showSignIn err/', err)
         })
     }
 
-    function getUser() {
+    function get_user() {
       return oktaSignIn.authClient.token.getUserInfo()
-        .then(function(user) {
-          oktaSignIn.authClient.tokenManager.get('idToken')
-            .then(function(idToken) {
-              window.location = 'http://localhost:8080/wp-login.php?log_in_from_id_token='+idToken.idToken;
-            });
-        })
+        .then(redirect_to_set_auth)
     }
 
-    getUser()
-      .catch(function(err) {
-        console.log('//getUser err/', err)
-        authenticate()
-      })
+    get_user().catch(authenticate)
 </script>

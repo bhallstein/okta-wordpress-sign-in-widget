@@ -4,6 +4,8 @@
   $baseUrl =
     parse_url($issuer, PHP_URL_SCHEME) . '://' .
     parse_url($issuer, PHP_URL_HOST);
+
+  $wp_url = get_site_url();
 ?>
 
 var oktaSignIn = new OktaSignIn({

@@ -50,7 +50,19 @@ class OktaAdmin{
         add_settings_field(
             'okta-widget-login-redirect',
             'Login redirect',
-            function() { $this->optionsPageTextInputAction('okta-widget-login-redirect', 'text', null, 'Set the redirect URL after login. Please note these must be configured as permitted login redirects within the Okta app. (If left empty, uses the wp home url.)'); },
+            function() {
+                $wp_home = get_home_url();
+                $this->optionsPageTextInputAction(
+                    'okta-widget-login-redirect',
+                    'text',
+                    null,
+                    'Set the redirect URL after login. Please note:<br>' .
+                    '1. this must be configured as a permitted login redirect within the Okta app<br>' .
+                    '2. if wp-login.php?redirect_to is set, it overrides this redirect, for convenience<br>' .
+                    "3. if nothing is entered, the wp home url will be used ('$wp_home').<br>".
+                    '4. ?token=xxx will be appended'
+                );
+            },
             'okta-sign-in-widget',
             'okta-sign-in-widget-options-section'
         );

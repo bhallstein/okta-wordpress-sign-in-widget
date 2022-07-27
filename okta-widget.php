@@ -110,6 +110,7 @@ class OktaSignIn
         }
 
         if (isset($_GET['log_in_from_id_token'])) {
+
             $this->logUserIntoWordPressWithIDToken($_GET['log_in_from_id_token'], $redirect_to);
             exit;
         }
@@ -124,7 +125,7 @@ class OktaSignIn
         exit;
     }
 
-    private function useWordpressLogin() 
+    private function useWordpressLogin()
     {
         // Always skip showing the Okta widget on POST requests
         if($_SERVER['REQUEST_METHOD'] === 'POST')
@@ -179,12 +180,13 @@ class OktaSignIn
         if ($response === false) {
             die("Invalid id_token received from Okta");
         }
+
         $claims = json_decode($response['body'], true);
         if (!$claims['active']) {
             die("Okta reports that id_token is not active or client authentication failed:" . $claims['error_description']);
         }
         /********************************************/
-        
+
         $this->logUserIntoWordPressFromEmail($claims, $redirect_to);
     }
 
@@ -217,8 +219,16 @@ class OktaSignIn
             $redirect_uri = $_SESSION['redirect_to'];
             unset($_SESSION['redirect_to']);
         } else {
-            $redirect_uri = home_url();
+            $redirect_uri = get_option('okta-widget-login-redirect') ?: get_home_url();
         }
+
+        $username = $user->display_name ?: $user->user_login ?: $user->user_email;
+        $token = base64_encode(json_encode([
+            'username' => $username,
+        ]));
+        $redirect_uri .= (preg_match($redirect_uri, '/\?/') ? '&' : '?');
+        $redirect_uri .= "token=$token";
+
         wp_redirect($redirect_uri);
     }
 }
