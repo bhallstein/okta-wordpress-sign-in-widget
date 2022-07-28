@@ -204,6 +204,7 @@ class OktaSignIn
             $user_id = $user->ID;
         }
 
+        $user_meta = get_user_meta($user_id);
         do_action('okta_widget_before_login', $claims, $user);
 
         // Actually log the user in now
@@ -222,9 +223,10 @@ class OktaSignIn
             $redirect_uri = get_option('okta-widget-login-redirect') ?: get_home_url();
         }
 
-        $username = $user->display_name ?: $user->user_login ?: $user->user_email;
         $token = base64_encode(json_encode([
-            'username' => $username,
+            'username' => ($user->display_name ?: $user->user_login ?: $user->user_email),
+            'first_name' => $user_meta['first_name'],
+            'last_name' => $user_meta['last_name'],
         ]));
         $redirect_uri .= (preg_match($redirect_uri, '/\?/') ? '&' : '?');
         $redirect_uri .= "token=$token";
