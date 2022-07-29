@@ -6,6 +6,7 @@ Install:
 
 - Drop this folder into the WordPress plugins folder
 - Enable the plugin
+- NB jwt-authentication-for-wp-rest-api is also required for JWT generation.
 - Go to the plugins settings page, add the issuer URI, client ID, and set the desired redirect.
 
 
@@ -16,6 +17,7 @@ If you leave `enable native WordPress logins` unchecked, **make sure** your admi
 
 ## Development Environment
 
+- Copy jwt-authentication-for-wp-rest-api into this folder.
 - Run `sh scripts/up.sh` to start a dev environment using Docker.
 - Open http://localhost:8080
 

@@ -225,13 +225,61 @@ class OktaSignIn
 
         $token = base64_encode(json_encode([
             'username' => ($user->display_name ?: $user->user_login ?: $user->user_email),
+            'email' => $user->user_email,
             'first_name' => $user_meta['first_name'],
             'last_name' => $user_meta['last_name'],
+            'jwt' => self::generateJWT($user),
         ]));
+
         $redirect_uri .= (preg_match($redirect_uri, '/\?/') ? '&' : '?');
         $redirect_uri .= "token=$token";
 
         wp_redirect($redirect_uri);
+    }
+
+    private function generateJWT($user)
+    {
+        // This is a modified version of the generate_token function from the JWT auth plugin.
+        // (That plugin only supports authenticating a user by username/password.
+        //  In this case we takle a user who has been authenticated via okta token, as above.)
+
+        if (!is_callable(['\Firebase\JWT\JWT', 'encode'])) {
+            return;
+        }
+
+        $secret_key = defined('JWT_AUTH_SECRET_KEY') ? JWT_AUTH_SECRET_KEY : false;
+        if (!$secret_key) {
+            return;
+        }
+
+        $issuedAt = time();
+        $notBefore = apply_filters('jwt_auth_not_before', $issuedAt, $issuedAt);
+        $expire = apply_filters('jwt_auth_expire', $issuedAt + (DAY_IN_SECONDS * 7), $issuedAt);
+
+        $token = array(
+            'iss' => get_bloginfo('url'),
+            'iat' => $issuedAt,
+            'nbf' => $notBefore,
+            'exp' => $expire,
+            'data' => array(
+                'user' => array(
+                    'id' => $user->data->ID,
+                ),
+            ),
+        );
+
+        $token = \Firebase\JWT\JWT::encode(
+            apply_filters('jwt_auth_token_before_sign', $token, $user),
+            $secret_key
+        );
+        $data = array(
+            'token' => $token,
+            'user_email' => $user->data->user_email,
+            'user_nicename' => $user->data->user_nicename,
+            'user_display_name' => $user->data->display_name,
+        );
+
+        return apply_filters('jwt_auth_token_before_dispatch', $data, $user);
     }
 }
 
