@@ -199,6 +199,11 @@ class OktaSignIn
         if (!$user) {
             $random_password = wp_generate_password($length = 64, $include_standard_special_chars = false);
             $user_id = wp_create_user($email, $random_password, $email);
+            wp_update_user([
+                'ID' => $user_id,
+                'first_name' => $claims['UserFirstName'] ?? '',
+                'last_name' => $claims['UserLastName'] ?? '',
+            ]);
             $user = get_user_by('id', $user_id);
         } else {
             $user_id = $user->ID;
